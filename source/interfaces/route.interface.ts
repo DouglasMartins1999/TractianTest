@@ -8,5 +8,5 @@ export default interface Route {
     handleFiles?: boolean,
     ignoreLogger?: string,
     authNeeded?: boolean,
-    handledBy: (IncomingRequest: Request) => Reply,
+    handledBy: (IncomingRequest: Request) => Reply | Promise<Reply>,
 }

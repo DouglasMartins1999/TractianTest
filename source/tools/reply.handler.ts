@@ -24,13 +24,13 @@ export default class Reply {
 	}
 
 	setListBehavior(onlyFirstItem: boolean = false, throwWhenEmpty: boolean = global.env.THROW_ON_EMPTY_LIST) {
-		if(throwWhenEmpty && !this.payload.length) {
-			this.setError({ info: "Não foram encontrados registros nessa consulta" });
+		if(throwWhenEmpty && !this.payload?.length) {
+			this.setError({});
 			this.code = Reply.codes.NOTFOUND;
 			return this;
 		}
 
-		if (onlyFirstItem && this.payload.length === 1) {
+		if (onlyFirstItem && this.payload?.length === 1) {
 			this.payload = this.payload[0];
 		}
 
