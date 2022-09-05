@@ -8,8 +8,8 @@ export default class User extends Model {
 
     static defaultSchema = Joi.object({
         name: Joi.string().min(User.reqs.MIN_NAME_LENGTH).label("Nome do Usuário"),
-        company: Joi.string().hex().label("Companhia Atual"),
         role: Joi.string().valid("Operador", "Coordenador", "Gerente").label("Cargo do Usuário"),
+        companyRef: Joi.string().hex().label("Companhia Atual"),
         createdAt: Joi.date().iso().default("now").label("Data de Criação"),
         updatedAt: Joi.date().iso().default("now").label("Data de Atualização")
     })
