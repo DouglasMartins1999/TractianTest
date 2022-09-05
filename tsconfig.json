@@ -1,0 +1,7 @@
+{
+    "include": ["source/**/*"],
+    "exclude": ["node_modules"],
+    "compilerOptions": {
+        "typeRoots": ["source/global.ts" ]
+    },
+}
