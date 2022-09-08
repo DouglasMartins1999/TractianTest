@@ -1,7 +1,7 @@
 # TractianTest
 REST API Test to Tractian Selection Process
 
-O teste está acessível em produção a partir desse link: https://arm.digiture.eu.org/tractian/companies
+O teste está acessível em produção a partir desse link: https://arm.digiture.eu.org/tractian/[rota abaixo]
 
 As rotas da aplicação aceitam apenas requisições com o body em JSON. Não é necessário autenticação. As rotas e seus respectivos métodos presentes no momento são:
 
