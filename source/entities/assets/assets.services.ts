@@ -48,7 +48,6 @@ class AssetService extends Service {
         const { company, id } = ctx.params;
         const action = await assetsRepository.delete(company, id);
 
-        console.log(action);
         const status = action?.modifiedCount 
             ? Reply.codes.NOCONTENT
             : Reply.codes.NOTFOUND;
