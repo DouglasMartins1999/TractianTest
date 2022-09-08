@@ -1,39 +1,48 @@
-import instance from "../../settings/database.conf";
+import { ObjectId } from "mongodb";
+import ArrayRepository from "../../tools/repo.handler";
 import User from "./users.domain";
-import * as mongodb from "mongodb";
-import { exceptions } from "../../settings/alerts.conf";
 
 export class UserRepository {
-    insert(user: User) {
-        return instance
-            .collection("users")
-            .insertOne(user);
+    public repo: ArrayRepository;
+
+    constructor(collection: string){
+        this.repo = new ArrayRepository(collection);
     }
 
-    select(id?: string) {
-        const query = instance
-            .collection("users");
+    insert(company: string, user: User) {
+        const query = { _id: new ObjectId(company) };
+        const update = { $push: { members: user } };
 
-        return id
-            ? query.findOne({ _id: new mongodb.ObjectId(id) })
-            : query.find().toArray();
+        return this.repo.insert(query, update);
     }
 
-    update(user: User, id: string) {
-        if(!id) throw new Error(exceptions.id_not_informed);
+    select(company: string, id?: string) {
+        const query: any = { _id: new ObjectId(company) };
+        const options: any = { projection: {} }
+        
+        if(id) {
+            query.members = { $elemMatch: { _id: new ObjectId(id) } }
+            options.projection["members.$"] = 1
+        } else {
+            options.projection["members"] = 1
+        }
 
-        return instance
-            .collection("users")
-            .updateOne({ _id: new mongodb.ObjectId(id) }, { $set: user });
+        return this.repo.select(query, options);
     }
 
-    delete(id: string){
-        if(!id) throw new Error(exceptions.id_not_informed);
+    update(company: string, user: User, id: string) {
+        const query = { _id: new ObjectId(company), members: { $elemMatch: { _id: new ObjectId(id) } } };
+        const update = { $set: user.keysWithPrefix("members.$.") }
 
-        return instance
-            .collection("users")
-            .deleteOne({ _id: new mongodb.ObjectId(id )});
+        return this.repo.update(query, update, "members.$");
+    }
+
+    delete(company: string, id: string){
+        const query = { _id: new ObjectId(company) };
+        const update = { $pull: { members: { _id: new ObjectId(id) } } }
+
+        return this.repo.delete(query, update);
     }
 }
 
-export default new UserRepository();
+export default new UserRepository("companies");

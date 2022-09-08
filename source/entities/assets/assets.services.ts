@@ -2,23 +2,23 @@ import { Request } from "express";
 import Reply from "../../tools/reply.handler";
 import Service from "../../tools/service.handler";
 
-import User from "./users.domain";
-import usersRepository from "./users.repository";
+import assetsRepository from "./assets.repository";
+import Asset from "./assets.domain";
 
-class UserService extends Service {
+class AssetService extends Service {
     async fetch(ctx: Request) {
         const { company, id } = ctx.params;
-        const action = await usersRepository.select(company, id);
+        const action = await assetsRepository.select(company, id);
 
-        return new Reply(Reply.codes.OK, action[0]?.members).setListBehavior(!!id, true);
+        return new Reply(Reply.codes.OK, action[0]?.assets).setListBehavior(!!id, true);
     }
 
     async create(ctx: Request) {
         const { company } = ctx.params;
-        const user = new User(ctx.body).validate(User.creationSchema);
-        const action = await usersRepository.insert(company, user);
+        const asset = new Asset(ctx.body).validate(Asset.creationSchema);
+        const action = await assetsRepository.insert(company, asset);
 
-        const body = { id: user["_id"] };
+        const body = { id: asset["_id"] };
         const status = action.modifiedCount 
             ? Reply.codes.CREATED 
             : Reply.codes.BADREQUEST;
@@ -28,8 +28,8 @@ class UserService extends Service {
 
     async update(ctx: Request) {
         const { company, id } = ctx.params;
-        const user = new User(ctx.body).validate();
-        const action = await usersRepository.update(company, user, id);
+        const asset = new Asset(ctx.body).validate();
+        const action = await assetsRepository.update(company, asset, id);
 
         const body = action?.value?.members?.[0];
         const status = body
@@ -41,7 +41,7 @@ class UserService extends Service {
 
     async remove(ctx: Request) {
         const { company, id } = ctx.params;
-        const action = await usersRepository.delete(company, id);
+        const action = await assetsRepository.delete(company, id);
 
         const body = { deletedAmount: action?.upsertedCount };
         const status = Reply.codes.NOCONTENT;
@@ -50,4 +50,5 @@ class UserService extends Service {
     }
 }
 
-export default new UserService();
+export default new AssetService();
+

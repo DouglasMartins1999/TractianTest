@@ -1,4 +1,5 @@
 import * as Joi from "joi";
+import * as mongodb from "mongodb";
 import { validations } from "../settings/alerts.conf";
 
 export default class Model {
@@ -13,4 +14,12 @@ export default class Model {
         if (model.error) throw model.error;
 		return model.value;
 	}
+
+    keysWithPrefix(prefix: string): { [key: string]: any } {
+        const newObj = {};
+        const keys = Object.keys(JSON.parse(JSON.stringify(this)));
+
+        keys.forEach(k => newObj[prefix + k] = this[k])
+        return newObj;
+    }
 }
