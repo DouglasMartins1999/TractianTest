@@ -10,7 +10,7 @@ class UserService extends Service {
         const { company, id } = ctx.params;
         const action = await usersRepository.select(company, id);
 
-        return new Reply(Reply.codes.OK, action[0]?.members).setListBehavior(!!id, true);
+        return new Reply(Reply.codes.OK, action[0]?.["members"]).setListBehavior(!!id, true);
     }
 
     async create(ctx: Request) {
@@ -31,7 +31,7 @@ class UserService extends Service {
         const user = new User(ctx.body).validate();
         const action = await usersRepository.update(company, user, id);
 
-        const body = action?.value?.members?.[0];
+        const body = action?.value?.["members"]?.[0];
         const status = body
             ? Reply.codes.ACCEPTED 
             : Reply.codes.NOTFOUND;

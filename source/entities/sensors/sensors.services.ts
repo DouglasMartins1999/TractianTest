@@ -18,7 +18,7 @@ class SensorService extends Service {
         const sensor = new Sensor(ctx.body).validate(Sensor.creationSchema);
         const action = await sensorsRepository.insert(company, asset, sensor);
 
-        const body = { id: sensor["_id"] };
+        const body = { id: sensor["_id"], action };
         const status = action.modifiedCount 
             ? Reply.codes.CREATED 
             : Reply.codes.BADREQUEST;
@@ -31,7 +31,7 @@ class SensorService extends Service {
         const sensor = new Sensor(ctx.body).validate();
         const action = await sensorsRepository.update(company, asset, sensor);
 
-        const body = action?.value?.members?.[0];
+        const body = action?.value?.["sensors"]?.[0];
         const status = body
             ? Reply.codes.ACCEPTED 
             : Reply.codes.NOTFOUND;

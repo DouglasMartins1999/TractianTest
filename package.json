@@ -12,7 +12,6 @@
   "author": "Douglas Martins",
   "license": "ISC",
   "dependencies": {
-    "@types/mongodb": "^4.0.7",
     "@types/multer": "^1.4.7",
     "@types/passport": "^1.0.10",
     "auto-parse": "^1.8.0",

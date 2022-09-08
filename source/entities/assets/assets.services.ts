@@ -10,7 +10,7 @@ class AssetService extends Service {
         const { company, id } = ctx.params;
         const action = await assetsRepository.select(company, id);
 
-        return new Reply(Reply.codes.OK, action[0]?.assets).setListBehavior(!!id, true);
+        return new Reply(Reply.codes.OK, action[0]?.["assets"]).setListBehavior(!!id, true);
     }
 
     async create(ctx: Request) {
@@ -31,7 +31,7 @@ class AssetService extends Service {
         const asset = new Asset(ctx.body).validate();
         const action = await assetsRepository.update(company, asset, id);
 
-        const body = action?.value?.members?.[0];
+        const body = action?.value?.["assets"]?.[0];
         const status = body
             ? Reply.codes.ACCEPTED 
             : Reply.codes.NOTFOUND;

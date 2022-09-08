@@ -1,4 +1,4 @@
-import { AnyBulkWriteOperation, ObjectId } from "mongodb";
+import { ObjectId } from "mongodb";
 import startQueryOn from "../../settings/database.conf";
 import ArrayRepository from "../../tools/repo.handler";
 import Sensor from "./sensors.domain";
@@ -10,25 +10,30 @@ export class SensorRepository {
         this.repo = new ArrayRepository(collection);
     }
 
-    insert(company: string, asset: string, sensor: Sensor) {
-        const query = { _id: new ObjectId(company), assets: { $elemMatch: { _id: new ObjectId(asset) } } };
-        const update = [
-            { $push: { "assets.$.sensors.previous": "assets.$.sensors.current" }},
-            { $set: { "assets.$.sensors.current": sensor } },
+    async insert(company: string, asset: string, sensor: Sensor) {
+        const query = await this.select(company, asset);
+        const current = query[0]?.["assets"]?.[0]?.["sensors"]?.["current"];
+
+        const filter = { _id: new ObjectId(company), assets: { $elemMatch: { _id: new ObjectId(asset) } } };
+        const actions = [
+            { $push: { "assets.$.sensors.previous": current } },
+            { $set: { "assets.$.sensors.current": {} } },
+            { $set: sensor.keysWithPrefix("assets.$.sensors.current.") },
         ];
 
-        return this.repo.insert(query, update);
+        return startQueryOn(this.collection)
+            .bulkWrite(actions.map(update => ({ updateOne: { filter, update } })))
     }
 
     select(company: string, asset: string) {
-        const query: any = { _id: new ObjectId(company), "assets._id": { _id: new ObjectId(asset) } };
-        const options: any = { projection: { "assets.$.sensors": 1 } }
+        const query: any = { _id: new ObjectId(company), assets: { $elemMatch: { _id: new ObjectId(asset) } } };
+        const options: any = { projection: { "assets.$": 1 } }
 
         return this.repo.select(query, options);
     }
 
     update(company: string, asset: string, sensor: Sensor) {
-        const query = { _id: new ObjectId(company), "assets._id": new ObjectId(asset) };
+        const query = { _id: new ObjectId(company), assets: { $elemMatch: { _id: new ObjectId(asset) } } };
         const update = { $set: sensor.keysWithPrefix("assets.$.sensors.current.") }
 
         return this.repo.update(query, update, "assets.$.sensors.current.");
