@@ -34,7 +34,7 @@ export class UserRepository {
         const query = { _id: new ObjectId(company), members: { $elemMatch: { _id: new ObjectId(id) } } };
         const update = { $set: user.keysWithPrefix("members.$.") }
 
-        return this.repo.update(query, update, "members.$");
+        return this.repo.update(query, update, { $getField: "members.$" });
     }
 
     delete(company: string, id: string){

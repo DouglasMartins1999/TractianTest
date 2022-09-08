@@ -29,6 +29,8 @@ export default class ErrorModule implements Module {
         if (error.statuscode)
             status = error.statuscode;
 
+        console.log(error);
+
         res.status(status);
         res.json({ info: message });
         return next();

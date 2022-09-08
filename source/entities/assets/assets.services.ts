@@ -4,13 +4,18 @@ import Service from "../../tools/service.handler";
 
 import assetsRepository from "./assets.repository";
 import Asset from "./assets.domain";
+import { Binary } from "mongodb";
 
 class AssetService extends Service {
     async fetch(ctx: Request) {
         const { company, id } = ctx.params;
         const action = await assetsRepository.select(company, id);
+        
+        const body = action
+            .map((a: any) => a.assets).flat()
+            .map((a: any) => ({ ...a, picture: undefined }));
 
-        return new Reply(Reply.codes.OK, action[0]?.["assets"]).setListBehavior(!!id, true);
+        return new Reply(Reply.codes.OK, body).setListBehavior(!!id, true);
     }
 
     async create(ctx: Request) {
@@ -47,6 +52,28 @@ class AssetService extends Service {
         const status = Reply.codes.NOCONTENT;
 
         return new Reply(status, body);
+    }
+
+    async attachPicture(ctx: Request) {
+        const { company, id } = ctx.params;
+        
+        const file = [ ...(ctx.files as any[]) ].find(f => f.fieldname === "image");
+        const action = await assetsRepository.binaries(company, id, "picture", file?.buffer);
+
+        return new Reply(Reply.codes.CREATED, action);
+    }
+
+    async fetchPicture(ctx: Request) {
+        const { company, id } = ctx.params;
+        const action = await assetsRepository.select(company, id);
+
+        const body = action
+            .map((a: any) => a.assets).flat()
+            .map((a: any) => a.picture)
+            .map((a: Binary) => a.buffer)[0];
+
+        // Melhorias: Salvar o MimeType da Imagem para retornar ao navegador
+        return new Reply(Reply.codes.OK, body);
     }
 }
 

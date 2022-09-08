@@ -15,9 +15,9 @@ export default class ArrayRepository {
             .updateOne(filter, operation);
     }
 
-    update(filter: Filter<Document>, operation: Partial<Document>, field: string) {
+    update(filter: Filter<Document>, operation: Partial<Document>, field: Document) {
         return startQueryOn(this.collection)
-            .findOneAndUpdate(filter, operation, { projection: { [field]: 1 }});
+            .findOneAndUpdate(filter, operation, { projection: { field: 1 }});
     }
 
     delete(filter: Filter<Document>, operation: Partial<Document>) {

@@ -31,7 +31,19 @@ const routes: Route[] = [
         method: "DELETE",
         description: "Remoção de Máquina",
         handledBy: assetsServices.remove,
-    }
+    },
+    {
+        path: "/companies/:company/assets/:id/picture",
+        method: "POST",
+        description: "Cadastro de Imagem da Máquina",
+        handledBy: assetsServices.attachPicture,
+    },
+    {
+        path: "/companies/:company/assets/:id/picture",
+        method: "GET",
+        description: "Cadastro de Imagem da Máquina",
+        handledBy: assetsServices.fetchPicture,
+    },
 ]
 
 export default routes;

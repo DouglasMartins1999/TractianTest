@@ -11,6 +11,7 @@ export class SensorRepository {
     }
 
     async insert(company: string, asset: string, sensor: Sensor) {
+        // Melhorias: Fazer operação de consulta também dentro do bulk
         const query = await this.select(company, asset);
         const current = query[0]?.["assets"]?.[0]?.["sensors"]?.["current"];
 
@@ -36,7 +37,7 @@ export class SensorRepository {
         const query = { _id: new ObjectId(company), assets: { $elemMatch: { _id: new ObjectId(asset) } } };
         const update = { $set: sensor.keysWithPrefix("assets.$.sensors.current.") }
 
-        return this.repo.update(query, update, "assets.$.sensors.current.");
+        return this.repo.update(query, update, { $getField: "assets.$.sensors.current" });
     }
 
     delete(company: string, asset: string){

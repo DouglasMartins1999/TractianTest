@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { Binary, ObjectId } from "mongodb";
 import ArrayRepository from "../../tools/repo.handler";
 import Asset from "./assets.domain";
 
@@ -17,6 +17,7 @@ export class AssetRepository {
     }
 
     select(company: string, id?: string) {
+        // Melhorias: Usar uma agregação para trazer apenas a informação sem a imagem
         const query: any = { _id: new ObjectId(company) };
         const options: any = { projection: { } }
         
@@ -34,7 +35,7 @@ export class AssetRepository {
         const query = { _id: new ObjectId(company), assets: { $elemMatch: { _id: new ObjectId(id) } } };
         const update = { $set: asset.keysWithPrefix("assets.$.") }
 
-        return this.repo.update(query, update, "assets.$");
+        return this.repo.update(query, update, { $getField: "assets.$" });
     }
 
     delete(company: string, id: string){
@@ -42,6 +43,14 @@ export class AssetRepository {
         const update = { $pull: { assets: { _id: new ObjectId(id) } } }
 
         return this.repo.delete(query, update);
+    }
+
+    binaries(company: string, id: string, key: string, buffer: Buffer) {
+        // Melhorias: Usar uma agregação para trazer apenas a imagem
+        const query = { _id: new ObjectId(company), assets: { $elemMatch: { _id: new ObjectId(id) } } };
+        const update = { $set: { ["assets.$." + key]: new Binary(buffer) } }
+
+        return this.repo.update(query, update, { $getField: "assets.$." + key });
     }
 }
 
