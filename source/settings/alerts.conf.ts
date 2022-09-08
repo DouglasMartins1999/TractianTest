@@ -1,13 +1,5 @@
 import Reply from "../tools/reply.handler";
 
-export const exceptions: { [key: string]: string } = {
-	id_not_informed: "Por favor, informe o ID desse registro para completar a operação"
-};
-
-export const constraints: { [key: string]: string } = {
-	generic_db_error: "Não temos mais detalhes do ocorrido, mas provavelmente o time de desenvolvimento está trabalhando para corrigir esse problema"
-};
-
 export const statuscode: { [key: number]: string } = {
     [Reply.codes.UNAUTHORIZED]: "Um token de autenticação não foi encontrado",
 	[Reply.codes.FORBIDDEN]: "Esse usuário não tem permissão para acessar esse recurso. Tente trocar de usuário ou relogar em sua conta",

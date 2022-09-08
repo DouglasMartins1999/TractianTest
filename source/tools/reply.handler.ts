@@ -1,5 +1,3 @@
-import { exceptions } from "../settings/alerts.conf";
-
 export default class Reply {
 	code: number;
 	payload: any;

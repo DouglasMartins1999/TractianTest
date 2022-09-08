@@ -6,8 +6,8 @@ export default class Company extends Model {
         name: Joi.string().label("Nome Fantasia"),
         location: Joi.string().hex().label("Localização"),
         sector: Joi.string().label("Setor de Atuação"),
-        createdAt: Joi.date().iso().default(new Date()).label("Data de Criação"),
-        updatedAt: Joi.date().iso().default(new Date()).label("Data de Atualização")
+        createdAt: Joi.date().iso().default(() => new Date()).label("Data de Criação"),
+        updatedAt: Joi.date().iso().default(() => new Date()).label("Data de Atualização")
     })
 
     static creationSchema = Company.defaultSchema.concat(Joi.object({

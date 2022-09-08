@@ -15,7 +15,7 @@ class AssetService extends Service {
             .map((a: any) => a.assets).flat()
             .map((a: any) => ({ ...a, picture: undefined }));
 
-        return new Reply(Reply.codes.OK, body).setListBehavior(!!id, true);
+        return new Reply(Reply.codes.OK, body).setListBehavior(!!id);
     }
 
     async create(ctx: Request) {
@@ -36,22 +36,24 @@ class AssetService extends Service {
         const asset = new Asset(ctx.body).validate();
         const action = await assetsRepository.update(company, asset, id);
 
-        const body = action?.value?.["assets"]?.[0];
-        const status = body
+        const changed = action?.lastErrorObject?.n;
+        const status = changed
             ? Reply.codes.ACCEPTED 
             : Reply.codes.NOTFOUND;
         
-        return new Reply(status, body);
+        return new Reply(status, { changed });
     }
 
     async remove(ctx: Request) {
         const { company, id } = ctx.params;
         const action = await assetsRepository.delete(company, id);
 
-        const body = { deletedAmount: action?.upsertedCount };
-        const status = Reply.codes.NOCONTENT;
+        console.log(action);
+        const status = action?.modifiedCount 
+            ? Reply.codes.NOCONTENT
+            : Reply.codes.NOTFOUND;
 
-        return new Reply(status, body);
+        return new Reply(status, {});
     }
 
     async attachPicture(ctx: Request) {

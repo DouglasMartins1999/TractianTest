@@ -10,7 +10,7 @@ class CompanyService extends Service {
         const id = ctx.params.id;
         const result = await companiesRepository.select(id);
 
-        return new Reply(Reply.codes.OK, result).setListBehavior(!!id, true);
+        return new Reply(Reply.codes.OK, result).setListBehavior(!!id);
     }
 
     async create(ctx: Request) {
@@ -23,9 +23,13 @@ class CompanyService extends Service {
     async update(ctx: Request) {
         const id = ctx.params.id;
         const company = new Company(ctx.body).validate();
+
         const result = await companiesRepository.update(company, id);
+        const status = result.modifiedCount
+            ? Reply.codes.ACCEPTED 
+            : Reply.codes.NOTFOUND;
         
-        return new Reply(Reply.codes.ACCEPTED, { id: result?.upsertedId });
+        return new Reply(status, { changed: result.modifiedCount });
     }
 
     async remove(ctx: Request) {

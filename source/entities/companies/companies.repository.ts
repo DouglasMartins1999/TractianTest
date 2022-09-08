@@ -1,6 +1,5 @@
 import startQueryOn from "../../settings/database.conf";
 import * as mongodb from "mongodb";
-import { exceptions } from "../../settings/alerts.conf";
 import Company from "./companies.domain";
 
 export class CompaniesRepository {
@@ -11,22 +10,19 @@ export class CompaniesRepository {
 
     select(id?: string) {
         const query = startQueryOn("companies");
+        const options = { projection: { assets: 0, members: 0 } }
 
         return id
-            ? query.findOne({ _id: new mongodb.ObjectId(id) })
-            : query.find().toArray();
+            ? query.findOne({ _id: new mongodb.ObjectId(id) }, options)
+            : query.find({}, options).toArray();
     }
 
     update(company: Company, id: string) {
-        if(!id) throw new Error(exceptions.id_not_informed);
-
         return startQueryOn("companies")
             .updateOne({ _id: new mongodb.ObjectId(id) }, { $set: company });
     }
 
     delete(id: string){
-        if(!id) throw new Error(exceptions.id_not_informed);
-
         return startQueryOn("companies")
             .deleteOne({ _id: new mongodb.ObjectId(id )});
     }

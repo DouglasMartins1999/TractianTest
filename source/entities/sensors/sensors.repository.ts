@@ -40,14 +40,18 @@ export class SensorRepository {
         return this.repo.update(query, update, { $getField: "assets.$.sensors.current" });
     }
 
-    delete(company: string, asset: string){
-        const query = { _id: new ObjectId(company), assets: { $elemMatch: { _id: new ObjectId(asset) } } };
-        const update = [
-            { $push: { "assets.$.sensors.previous": "assets.$.sensors.current" }},
+    async delete(company: string, asset: string){
+        const query = await this.select(company, asset);
+        const current = query[0]?.["assets"]?.[0]?.["sensors"]?.["current"];
+
+        const filter = { _id: new ObjectId(company), assets: { $elemMatch: { _id: new ObjectId(asset) } } };
+        const actions = [
+            { $push: { "assets.$.sensors.previous": current }},
             { $set: { "assets.$.sensors.current": null } },
         ];
 
-        return this.repo.delete(query, update);
+        return startQueryOn(this.collection)
+            .bulkWrite(actions.map(update => ({ updateOne: { filter, update } })))
     }
 }
 

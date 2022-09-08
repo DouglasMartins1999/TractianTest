@@ -9,8 +9,13 @@ class SensorService extends Service {
     async fetch(ctx: Request) {
         const { company, asset } = ctx.params;
         const action = await sensorsRepository.select(company, asset);
+        
+        const body = action[0]?.["assets"]?.[0]?.["sensors"];
+        const status = body
+            ? Reply.codes.OK 
+            : Reply.codes.NOTFOUND;
 
-        return new Reply(Reply.codes.OK, action).setListBehavior(!!asset, true);
+        return new Reply(status, body);
     }
 
     async create(ctx: Request) {
@@ -18,8 +23,8 @@ class SensorService extends Service {
         const sensor = new Sensor(ctx.body).validate(Sensor.creationSchema);
         const action = await sensorsRepository.insert(company, asset, sensor);
 
-        const body = { id: sensor["_id"], action };
-        const status = action.modifiedCount 
+        const body = { code: sensor["code"] };
+        const status = action.result.nModified 
             ? Reply.codes.CREATED 
             : Reply.codes.BADREQUEST;
         
@@ -31,22 +36,23 @@ class SensorService extends Service {
         const sensor = new Sensor(ctx.body).validate();
         const action = await sensorsRepository.update(company, asset, sensor);
 
-        const body = action?.value?.["sensors"]?.[0];
-        const status = body
+        const changed = action?.lastErrorObject?.n;
+        const status = changed
             ? Reply.codes.ACCEPTED 
             : Reply.codes.NOTFOUND;
         
-        return new Reply(status, body);
+        return new Reply(status, { changed });
     }
 
     async remove(ctx: Request) {
         const { company, asset } = ctx.params;
         const action = await sensorsRepository.delete(company, asset);
 
-        const body = { deletedAmount: action?.upsertedCount };
-        const status = Reply.codes.NOCONTENT;
+        const status = action.result.nModified 
+            ? Reply.codes.NOCONTENT 
+            : Reply.codes.NOTFOUND;
 
-        return new Reply(status, body);
+        return new Reply(status, {});
     }
 }
 

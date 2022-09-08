@@ -10,7 +10,7 @@ class UserService extends Service {
         const { company, id } = ctx.params;
         const action = await usersRepository.select(company, id);
 
-        return new Reply(Reply.codes.OK, action[0]?.["members"]).setListBehavior(!!id, true);
+        return new Reply(Reply.codes.OK, action[0]?.["members"]).setListBehavior(!!id);
     }
 
     async create(ctx: Request) {
@@ -31,22 +31,23 @@ class UserService extends Service {
         const user = new User(ctx.body).validate();
         const action = await usersRepository.update(company, user, id);
 
-        const body = action?.value?.["members"]?.[0];
-        const status = body
+        const changed = action?.lastErrorObject?.n;
+        const status = changed
             ? Reply.codes.ACCEPTED 
             : Reply.codes.NOTFOUND;
         
-        return new Reply(status, body);
+        return new Reply(status, { changed });
     }
 
     async remove(ctx: Request) {
         const { company, id } = ctx.params;
         const action = await usersRepository.delete(company, id);
 
-        const body = { deletedAmount: action?.upsertedCount };
-        const status = Reply.codes.NOCONTENT;
+        const status = action?.modifiedCount 
+            ? Reply.codes.NOCONTENT
+            : Reply.codes.NOTFOUND;
 
-        return new Reply(status, body);
+        return new Reply(status, {});
     }
 }
 
